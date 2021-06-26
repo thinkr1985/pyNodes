@@ -40,7 +40,7 @@ def get_node_logger(module=__file__, debug_level=logging.DEBUG):
 
     log_file_handler = logging.FileHandler(LOG_FILE)
     log_file_handler.setFormatter(formatter)
-    log_file_handler.setLevel(debug_level)
+    log_file_handler.setLevel(logging.DEBUG)
 
     node_logger = logging.getLogger(logger_name)
     node_logger.addHandler(log_file_handler)

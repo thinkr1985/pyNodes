@@ -22,6 +22,7 @@ class Plug:
         self._name = str(name)
         self._value = value
         self._keys = {0: self._value}
+        self._node_type = 'plug'
 
     def __repr__(self):
         """
@@ -68,6 +69,10 @@ class Plug:
             dict: Returns dictionary presentation of this class.
         """
         return self._dict()
+
+    @property
+    def node_type(self):
+        return self._node_type
 
     @property
     def node(self):
@@ -222,6 +227,7 @@ class InputPlug(Plug):
         """
         super(InputPlug, self).__init__(node=node, name=name, value=value, **kwargs)
         self._connection = None
+        self._node_type = 'inputPlug'
 
     def __repr__(self):
         """Representation of this class."""
@@ -295,6 +301,7 @@ class OutputPlug(Plug):
         """
         super(OutputPlug, self).__init__(node=node, name=name, value=value, **kwargs)
         self._connections = None
+        self._node_type = 'outputPlug'
 
     def __repr__(self):
         """Representation of this class."""

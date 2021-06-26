@@ -1,7 +1,9 @@
 """Module to create Node class"""
 import traceback
+
 from nodeLogger import get_node_logger
 from plugCore import OutputPlug
+from constants import NETWORK
 
 logger = get_node_logger(__file__)
 
@@ -25,6 +27,7 @@ class Node:
         self._note = kwargs.get("node") or str()
         self._cached = True
         self._is_dirty = False
+        self._node_type = 'node'
 
     def __repr__(self):
         """Representing this class"""
@@ -86,6 +89,10 @@ class Node:
         return self.as_dict
 
     @property
+    def node_type(self):
+        return self._node_type
+
+    @property
     def name(self):
         """
         This property gets the name of the node.
@@ -104,7 +111,7 @@ class Node:
         Returns:
             None: Returns None.
         """
-        logger.debug(f'Setting name of node to "{name}"')
+        logger.debug(f'Renaming node "{self._name}" to "{name}"')
         self._name = str(name)
 
     def parents(self):

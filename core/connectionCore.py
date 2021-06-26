@@ -1,5 +1,6 @@
 """Module to create Connection class"""
 from nodeLogger import get_node_logger
+from constants import NETWORK
 
 logger = get_node_logger(__file__)
 
@@ -14,7 +15,7 @@ class Connection:
             destination_plug (InputPlug): Destination plug of the connection.
             **kwargs (**kwargs): Keyword arguments of this class.
         """
-        if not source_plug.plug_type == destination_plug.plug_type:
+        if not source_plug.node_type == destination_plug.node_type:
             logger.error(f'Connection cant be made in between "{source_plug.node.name}.{source_plug.name}" and '
                          f'"{destination_plug.node.name}.{destination_plug.name}"'
                          f'as both have different types')
@@ -30,6 +31,7 @@ class Connection:
 
         self._source_plug.add_connection(self)
         self._destination_plug.connection = self
+        self._node_type = 'connection'
 
     def __repr__(self):
         """Presentation of this class"""
@@ -71,6 +73,10 @@ class Connection:
             dict: Returns dict.
         """
         return self._dict()
+
+    @property
+    def node_type(self):
+        return self._node_type
 
     @property
     def source_plug(self):
