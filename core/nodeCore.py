@@ -3,7 +3,7 @@ import traceback
 
 from nodeLogger import get_node_logger
 from plugCore import OutputPlug
-from constants import NETWORK
+from constants import NETWORK, NameCheck
 
 logger = get_node_logger(__file__)
 
@@ -18,7 +18,6 @@ class Node:
             **kwargs : Extra parameters to pass this class.
         """
         logger.debug(f'Initializing node with name "{name}"')
-
         self._name = str(name)
         self._input_plugs = list()
         self._output_plug = OutputPlug(self, "Out", value=None)
@@ -28,6 +27,8 @@ class Node:
         self._cached = True
         self._is_dirty = False
         self._node_type = 'node'
+
+        NETWORK.register_node(self)
 
     def __repr__(self):
         """Representing this class"""
@@ -101,8 +102,8 @@ class Node:
         """
         return self._name
 
-    @name.setter
-    def name(self, name: str):
+    @NameCheck
+    def rename(self, name: str):
         """
         This method sets the name of node.
         Args:
@@ -340,3 +341,8 @@ class Node:
         logger.debug(f'Triggering evaluation of children of node "{self._name}"')
         for child in self.children():
             child.evaluate()
+
+
+node = Node("MyNode")
+node2 = Node("MyNod2e")
+node.rename("MyNod2e")

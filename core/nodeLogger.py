@@ -2,8 +2,10 @@
 import os
 import logging
 import datetime
+import tempfile
 
-from constants import DEBUG_LEVEL, TEMP_DIR
+DEBUG_LEVEL = logging.DEBUG
+TEMP_DIR = os.path.join(tempfile.gettempdir(), "NodeEditor")
 
 DATESTAMP = datetime.datetime.now().strftime("%d-%b-%Y")
 LOG_FILE = os.path.join(TEMP_DIR, f"{DATESTAMP}.log")

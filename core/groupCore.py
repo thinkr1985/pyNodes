@@ -1,7 +1,6 @@
 """Creating Group class"""
 from nodeLogger import get_node_logger
-from constants import NETWORK
-
+from constants import NETWORK, NameCheck
 logger = get_node_logger(__file__)
 
 
@@ -12,6 +11,8 @@ class GroupCore:
         self._node_type = 'groupCore'
         self._annotation = str()
         self._note = str()
+
+        NETWORK.register_node(self)
 
     def __repr__(self):
         return f'GroupCore({self._name})'
@@ -29,8 +30,8 @@ class GroupCore:
     def name(self):
         return self._name
 
-    @name.setter
-    def name(self, name: str):
+    @NameCheck
+    def rename(self, name: str):
         logger.debug(f'Renaming group "{self._name}" to "{name}"')
         self._name = name
 

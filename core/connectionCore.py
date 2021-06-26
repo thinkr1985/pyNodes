@@ -1,6 +1,5 @@
 """Module to create Connection class"""
 from nodeLogger import get_node_logger
-from constants import NETWORK
 
 logger = get_node_logger(__file__)
 
