@@ -2,25 +2,21 @@
 import logging
 
 from nodeLogger import get_node_logger
-
+from registry import RegisterInputPlug
 logger = get_node_logger(__file__)
 
 
 class Plug:
     """This is a base class of all Plugs"""
-    def __init__(self, node, name: str, value, **kwargs):
+    def __init__(self, **kwargs):
         """
         Initializing Plug class.
         Args:
-            node (Node): Node for which attribute is made.
-            name (str): Name of the plug.
-            value (any): Value of the plug.
+            **kwargs (any): Keyword arguments of this class.
         """
-        logger.debug(f'Initializing Plug "{name}" from the node "{node.name}"')
-
-        self._node = node
-        self._name = str(name)
-        self._value = value
+        self._node = kwargs.get("node")
+        self._name = kwargs.get("name")
+        self._value = kwargs.get("value")
         self._keys = {0: self._value}
         self._node_type = 'plug'
 
@@ -214,28 +210,26 @@ class Plug:
             return True
 
 
+@RegisterInputPlug
 class InputPlug(Plug):
     """Creating InputPlug class by inheriting Plug"""
-    def __init__(self, node, name: str, value, **kwargs):
+    def __init__(self, **kwargs):
         """
         Initializing InputPlug class.
         Args:
-            node (Node): Parent Node object.
-            name (str): Name of the Plug.
-            value (Any): Value of the plug.
             **kwargs (Any): Any parameters which needs to pass to this class.
         """
-        super(InputPlug, self).__init__(node=node, name=name, value=value, **kwargs)
+        super(InputPlug, self).__init__(**kwargs)
         self._connection = None
         self._node_type = 'inputPlug'
 
     def __repr__(self):
         """Representation of this class."""
-        return f'InputPlug({self._name},{self.value}, {self._node.name})'
+        return f'InputPlug({self.name},{self.value}, {self.node.name})'
 
     def __str__(self):
         """String representation of the class."""
-        return f'InputPlug({self._name},{self.value}, {self._node.name})'
+        return f'InputPlug({self.name},{self.value}, {self.node.name})'
 
     @property
     def is_connected(self):
@@ -279,37 +273,34 @@ class InputPlug(Plug):
             logger.info(f'Disconnecting "{self.node.name}.{self.name}" from "{self._connection.source_node.name}.'
                         f'{self._connection.source_plug.name}"')
             self._connection = None
-            self._node.evaluate()
+            self.node.evaluate()
             return True
 
         else:
             logger.error(f'There is no connections in plug '
-                         f'"{self._node.name}.{self._name}" to disconnect.')
+                         f'"{self.node.name}.{self.name}" to disconnect.')
             return False
 
 
 class OutputPlug(Plug):
     """Creating OutputPlug class by inheriting Plug"""
-    def __init__(self, node, name: str, value, **kwargs):
+    def __init__(self, **kwargs):
         """
         Initializing OutPutPlug class.
         Args:
-            node (Node): Parent Node object.
-            name (str): Name of the Plug.
-            value (Any): Value of the plug.
             **kwargs (Any): Any parameters which needs to pass to this class.
         """
-        super(OutputPlug, self).__init__(node=node, name=name, value=value, **kwargs)
+        super(OutputPlug, self).__init__(**kwargs)
         self._connections = None
         self._node_type = 'outputPlug'
 
     def __repr__(self):
         """Representation of this class."""
-        return f'OutputPlug({self._name},{self.value}, {self._node.name})'
+        return f'OutputPlug({self.name},{self.value}, {self.node.name})'
 
     def __str__(self):
         """String representation of the class."""
-        return f'OutputPlug({self._name},{self.value}, {self._node.name})'
+        return f'OutputPlug({self.name},{self.value}, {self.node.name})'
 
     def set_key(self, frame_number: int, value):
         """Disabling set key functionality on OutPutPlug"""
@@ -373,7 +364,7 @@ class OutputPlug(Plug):
                 logger.info(f'Disconnecting "{self.node.name}.{self.name}" from "'
                             f'{connection_object.destination_node.name}.{connection_object.destination_plug.name}"')
                 self._connections.pop(index)
-                self._node.evaluate_children()
+                self.node.evaluate_children()
                 return True
             else:
                 logger.error(f'Failed to remove connection from "{self.node.name}.{self.name}"')

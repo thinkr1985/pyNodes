@@ -3,22 +3,22 @@ import traceback
 
 from nodeLogger import get_node_logger
 from plugCore import OutputPlug
-from constants import NETWORK, NameCheck
+from registry import NameCheck, RegisterNode
 
 logger = get_node_logger(__file__)
 
 
+@RegisterNode
 class Node:
     """Creating Node class"""
-    def __init__(self, name: str, **kwargs):
+    def __init__(self, **kwargs):
         """
         Initializing Node class.
         Args:
             name (str): Name of the Node.
             **kwargs : Extra parameters to pass this class.
         """
-        logger.debug(f'Initializing node with name "{name}"')
-        self._name = str(name)
+        self._name = kwargs.get("name")
         self._input_plugs = list()
         self._output_plug = OutputPlug(self, "Out", value=None)
         self._icon = kwargs.get("icon") or str()
@@ -27,8 +27,6 @@ class Node:
         self._cached = True
         self._is_dirty = False
         self._node_type = 'node'
-
-        NETWORK.register_node(self)
 
     def __repr__(self):
         """Representing this class"""

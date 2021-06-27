@@ -1,35 +1,23 @@
 """Module to create Connection class"""
 from nodeLogger import get_node_logger
+from registry import RegisterConnection
 
 logger = get_node_logger(__file__)
 
 
+@RegisterConnection
 class Connection:
     """Creating a Connection class"""
-    def __init__(self, source_plug, destination_plug, **kwargs):
+    def __init__(self, **kwargs):
         """
         Initializing Connection class.
         Args:
-            source_plug (OutputPlug): Source plug of the connection.
-            destination_plug (InputPlug): Destination plug of the connection.
             **kwargs (**kwargs): Keyword arguments of this class.
         """
-        if not source_plug.node_type == destination_plug.node_type:
-            logger.error(f'Connection cant be made in between "{source_plug.node.name}.{source_plug.name}" and '
-                         f'"{destination_plug.node.name}.{destination_plug.name}"'
-                         f'as both have different types')
-            raise TypeError
-
-        logger.debug(f'Creating connection from "{source_plug.node.name}.{source_plug.name}"'
-                     f' to "{destination_plug.node.name}.{destination_plug.name}"')
-
-        self._source_node = source_plug.node
-        self._destination_node = destination_plug.node
-        self._source_plug = source_plug
-        self._destination_plug = destination_plug
-
-        self._source_plug.add_connection(self)
-        self._destination_plug.connection = self
+        self._source_plug = kwargs.get("source_plug")
+        self._destination_plug = kwargs.get("destination_plug")
+        self._source_node = self._source_plug.node
+        self._destination_node = self._destination_plug.node
         self._node_type = 'connection'
 
     def __repr__(self):
@@ -39,7 +27,8 @@ class Connection:
 
     def __str__(self):
         """String representation of this class."""
-        return f'Connection({self._source_plug.name},{self._destination_plug.name})'
+        return f'Connection({self._source_node.name}.{self._source_plug.name},' \
+               f'{self.destination_node.name}.{self._destination_plug.name})'
 
     def __iter__(self):
         """
@@ -72,6 +61,10 @@ class Connection:
             dict: Returns dict.
         """
         return self._dict()
+
+    @property
+    def name(self):
+        return self.__str__()
 
     @property
     def node_type(self):

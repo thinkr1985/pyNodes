@@ -1,24 +1,23 @@
 """Creating Group class"""
 from nodeLogger import get_node_logger
-from constants import NETWORK, NameCheck
+from registry import NameCheck, RegisterNode
 logger = get_node_logger(__file__)
 
 
+@RegisterNode
 class GroupCore:
-    def __init__(self, name: str, **kwargs):
-        self._name = name
+    def __init__(self, **kwargs):
+        self._name = kwargs.get("name")
         self._nodes = kwargs.get("nodes") or list()
-        self._node_type = 'groupCore'
+        self._node_type = 'group'
         self._annotation = str()
         self._note = str()
 
-        NETWORK.register_node(self)
-
     def __repr__(self):
-        return f'GroupCore({self._name})'
+        return f'Group({self._name})'
 
     def __str__(self):
-        return f'GroupCore({self._name})'
+        return f'Group({self._name})'
 
     def __iter__(self):
         yield 'name', self._name
