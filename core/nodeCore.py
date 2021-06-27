@@ -273,30 +273,6 @@ class Node:
                              f' exists on the node "{self.name}"')
                 raise NameError
 
-    def remove_plug(self, plug_name: str):
-        """
-        This method removes given plug from the node.
-        Args:
-            plug_name (str): Name of plug to remove.
-
-        Returns:
-            None: Returns None
-        """
-        plug_index = None
-        for index, plug_ in enumerate(self._input_plugs):
-            if plug_.name == plug_name:
-                plug_index = index
-                break
-
-        if plug_index or plug_index == 0:
-            logger.debug(f'removing plug "{plug_name}" from the node "{self.name}"')
-            self._input_plugs.pop(plug_index)
-        else:
-            logger.error(
-                msg=f'Plug with name "{plug_name}" does not exists in the node "{self.name}" to remove'
-            )
-            raise NameError
-
     def compute(self):
         """
         This method computes the result of all inputs.
@@ -339,8 +315,3 @@ class Node:
         logger.debug(f'Triggering evaluation of children of node "{self._name}"')
         for child in self.children():
             child.evaluate()
-
-
-node = Node("MyNode")
-node2 = Node("MyNod2e")
-node.rename("MyNod2e")

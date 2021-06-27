@@ -255,7 +255,6 @@ class InputPlug(Plug):
         Adds connection to this plug.
         Args:
             connection_object (Connection): Connection object.
-
         Returns:
             None: Returns None.
         """

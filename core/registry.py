@@ -1,3 +1,4 @@
+"""This module contains all the registry classes"""
 from constants import NETWORK
 from nodeLogger import get_node_logger
 
@@ -5,6 +6,10 @@ logger = get_node_logger(__file__)
 
 
 class NameCheck:
+    """Creating a NameCheck decorator class.
+        Calling this class as decorator to your node rename functions makes sure
+        that the node you are renaming have a unique name inside the network.
+    """
     def __init__(self, function):
         self._function = function
 
@@ -17,6 +22,10 @@ class NameCheck:
 
 
 class RegisterConnection:
+    """Creating RegisterConnection decorator class.
+        Calling this class as decorator to your connection object validates the
+        plugs before you create the class and adds the connection to the network.
+    """
     def __init__(self, connection_class):
         self._connection_class = connection_class
 
@@ -33,7 +42,23 @@ class RegisterConnection:
         NETWORK.add_connection(connection)
 
 
+class DeRegisterConnection:
+    """Creating DeRegisterConnection decorator class.
+        Calling this class as decorator before your disconnect function on node makes sure
+        to remove it from network.
+    """
+    def __init__(self, connection_class):
+        self._connection_class = connection_class
+
+    def __call__(self, **kwargs):
+        pass
+
+
 class RegisterNode:
+    """Creating RegisterNode decorator class.
+        Calling this class as decorator to Node class makes sure the node with
+        same name does not exists in the network and adds the resulting node to the network.
+    """
     def __init__(self, node_class):
         self._node_class = node_class
 
@@ -53,6 +78,10 @@ class RegisterNode:
 
 
 class RegisterInputPlug:
+    """Creating a RegisterInputPlug decorator class.
+        Calling this class as decorator your InputPlug class makes sure its
+        unique and adds the plug to node and network.
+    """
     def __init__(self, input_plug_class):
         self._input_plug_class = input_plug_class
 
