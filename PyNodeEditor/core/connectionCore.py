@@ -1,12 +1,12 @@
 """Module to create Connection class"""
-from nodeLogger import get_node_logger
-from registry import RegisterConnection
+from PyNodeEditor.core.nodeLogger import get_node_logger
+from PyNodeEditor.core.registry import RegisterConnection
 
 logger = get_node_logger(__file__)
 
 
 @RegisterConnection
-class Connection:
+class Connection(object):
     """Creating a Connection class"""
     def __init__(self, **kwargs):
         """

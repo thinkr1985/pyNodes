@@ -4,8 +4,9 @@ import logging
 import datetime
 import tempfile
 
+APP_NAME = "NodeEditor"
 DEBUG_LEVEL = logging.DEBUG
-TEMP_DIR = os.path.join(tempfile.gettempdir(), "NodeEditor")
+TEMP_DIR = os.path.join(tempfile.gettempdir(), APP_NAME)
 
 DATESTAMP = datetime.datetime.now().strftime("%d-%b-%Y")
 LOG_FILE = os.path.join(TEMP_DIR, f"{DATESTAMP}.log")
@@ -32,7 +33,7 @@ def get_node_logger(module=__file__, debug_level=logging.DEBUG):
 
     logger_name = os.path.split(module)[-1].split(".")[0]
     formatter = logging.Formatter(
-        fmt='%(levelname)s\t%(asctime)s-%(name)s-%(message)s',
+        fmt='%(levelname)s\t%(asctime)s-%(name)s-\t%(message)s',
         datefmt='%d-%b-%y-%H:%M:%S'
     )
 

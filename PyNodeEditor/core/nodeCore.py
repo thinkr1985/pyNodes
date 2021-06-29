@@ -3,13 +3,12 @@ import traceback
 
 from nodeLogger import get_node_logger
 from plugCore import OutputPlug
-from registry import NameCheck, RegisterNode
+from registry import NameCheck
 
 logger = get_node_logger(__file__)
 
 
-@RegisterNode
-class Node:
+class Node(object):
     """Creating Node class"""
     def __init__(self, **kwargs):
         """
@@ -20,13 +19,15 @@ class Node:
         """
         self._name = kwargs.get("name")
         self._input_plugs = list()
-        self._output_plug = OutputPlug(self, "Out", value=None)
+        self._output_plug = OutputPlug(node=self, name="Out", value=None)
         self._icon = kwargs.get("icon") or str()
         self._annotation = kwargs.get("annotation") or str()
         self._note = kwargs.get("node") or str()
         self._cached = True
         self._is_dirty = False
         self._node_type = 'node'
+
+        self.setup_plugs()
 
     def __repr__(self):
         """Representing this class"""
@@ -75,20 +76,32 @@ class Node:
         Returns:
             dict: Returns casted dictionary.
         """
-        yield 'name', self._name
-        yield 'plugs', [x.as_dict() for x in self._input_plugs]
-        yield 'icon', self._icon
-        yield 'annotation', self._annotation
-        yield 'note', self._note
-        yield 'cached', self._cached
-        yield 'isDirty', self._is_dirty
-        yield 'isAnimated', self.is_animated
+        return{
+            'name': self._name,
+            'plugs': [x.as_dict() for x in self._input_plugs],
+            'icon': self._icon,
+            'annotation': self._annotation,
+            'note': self._note,
+            'cached': self._cached,
+            'isDirty': self._is_dirty,
+            'isAnimated': self.is_animated,
+        }
 
     def as_dict(self):
-        return self.as_dict
+        """
+        This property returns node data in dictionary format.
+        Returns:
+            dict: returns dictionary containing node data.
+        """
+        return self._dict()
 
     @property
     def node_type(self):
+        """
+        This property returns node type of node.
+        Returns:
+            str: Returns node type of this class.
+        """
         return self._node_type
 
     @property
@@ -144,70 +157,138 @@ class Node:
 
     @property
     def input_plugs(self):
-        """gets all the input plugs"""
+        """
+        This property gets all the input plugs of this node.
+        Returns:
+            list: Returns list of all input plug of this node.
+        """
         return self._input_plugs
 
     @property
     def output_plug(self):
-        """gets the output plug"""
+        """
+        This property gets the output plug of this node.
+        Returns:
+            returns Output plug object.
+        """
         return self._output_plug
 
     @property
     def output(self):
+        """
+        This property gets the computed value of the output plug.
+        Returns:
+            returns the computed value of the node.
+        """
         return self._output_plug.value
 
     @property
     def is_dirty(self):
-        """checks if node is dirty"""
+        """
+        This property checks if node is dirty.
+        Returns:
+            bool: Returns True if its dirty else returns False.
+        """
         return self._is_dirty
 
     @is_dirty.setter
     def is_dirty(self, value: bool):
-        """sets the node's dirty status"""
+        """
+        This method sets the node's dirty status.
+        Args:
+            value (bool): True / False.
+
+        Returns:
+            None: Returns None.
+        """
         if isinstance(value, bool):
             self._is_dirty = value
 
     @property
     def icon(self):
-        """gets the icon path"""
+        """
+        This property gets node's the icon path.
+        Returns:
+            str: returns the node's icon path.
+        """
         return self._icon
 
     @icon.setter
     def icon(self, icon_path: str):
-        """sets the icon path"""
+        """
+        This method sets the icon path of the node.
+        Args:
+            icon_path (str): Icon file's full path.
+
+        Returns:
+            None: Returns Node.
+        """
         self._icon = icon_path
         logger.info(f'Icon path for node "{self._name}" set to {icon_path}')
 
     @property
     def annotation(self):
-        """gets the annotation of the node"""
+        """
+        This method gets the annotation of the node.
+        Returns:
+            str: Returns node's annotation.
+        """
         return self._annotation
 
     @annotation.setter
     def annotation(self, annotation_text: str):
-        """sets the annotations of the node"""
+        """
+        This method sets the annotations of the node.
+        Args:
+            annotation_text (str): Annotation string to add.
+
+        Returns:
+            None: Returns None.
+        """
         self._annotation = str(annotation_text)
         logger.info(f'Annotation for node "{self._name}" set to {annotation_text}')
 
     @property
     def note(self):
-        """gets the note of the node"""
+        """
+        This property gets the note of the node.
+        Returns:
+            str: Returns note of this node.
+        """
         return self._note
 
     @note.setter
     def note(self, note: str):
-        """sets the note to the node"""
+        """
+        This method sets the note to the node.
+        Args:
+            note (str): Note to set on this node.
+
+        Returns:
+            None: Returns None.
+        """
         self._note = str(note)
         logger.info(f'note for node "{self._name}" set to {note}')
 
     @property
     def cached(self):
-        """gets the cached state of the node"""
+        """
+        This property gets the cached state of the node.
+        Returns:
+            bool: Returns True if the node's cached mode on ON.
+        """
         return self._cached
 
     @cached.setter
     def cached(self, value: bool):
-        """set the cached state of the node"""
+        """
+        This method set the cached state of the node.
+        Args:
+            value (bool): Value to set for cached attribute of the node.
+
+        Returns:
+            None: Returns None.
+        """
         if isinstance(value, bool):
             self._cached = value
             logger.info(f'Cache state set for node "{self._name}" to {value}')
@@ -264,14 +345,10 @@ class Node:
         Returns:
             None: Returns None.
         """
-        if plug:
-            if not self.get_plug(plug.name):
-                logger.debug(f'Adding plug "{plug.name}" to node "{self.name}"')
-                self._input_plugs.append(plug)
-            else:
-                logger.error(f'Cant add plug with name "{plug.name}" as plug with same name already'
-                             f' exists on the node "{self.name}"')
-                raise NameError
+        self._input_plugs.append(plug)
+
+    def setup_plugs(self):
+        pass
 
     def compute(self):
         """

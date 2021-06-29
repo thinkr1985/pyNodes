@@ -5,7 +5,7 @@ logger = get_node_logger(__file__)
 
 
 @RegisterNode
-class Group:
+class Group(object):
     """Creating a Group class"""
     def __init__(self, **kwargs):
         """

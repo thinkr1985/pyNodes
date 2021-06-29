@@ -6,7 +6,7 @@ from registry import RegisterInputPlug
 logger = get_node_logger(__file__)
 
 
-class Plug:
+class Plug(object):
     """This is a base class of all Plugs"""
     def __init__(self, **kwargs):
         """
@@ -210,7 +210,6 @@ class Plug:
             return True
 
 
-@RegisterInputPlug
 class InputPlug(Plug):
     """Creating InputPlug class by inheriting Plug"""
     def __init__(self, **kwargs):
@@ -219,7 +218,7 @@ class InputPlug(Plug):
         Args:
             **kwargs (Any): Any parameters which needs to pass to this class.
         """
-        super(InputPlug, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self._connection = None
         self._node_type = 'inputPlug'
 
@@ -289,7 +288,7 @@ class OutputPlug(Plug):
         Args:
             **kwargs (Any): Any parameters which needs to pass to this class.
         """
-        super(OutputPlug, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self._connections = None
         self._node_type = 'outputPlug'
 

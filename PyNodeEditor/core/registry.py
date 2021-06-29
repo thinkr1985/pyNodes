@@ -1,5 +1,7 @@
 """This module contains all the registry classes"""
-from constants import NETWORK
+from functools import update_wrapper, partial
+
+import constants
 from nodeLogger import get_node_logger
 
 logger = get_node_logger(__file__)
@@ -11,11 +13,15 @@ class NameCheck:
         that the node you are renaming have a unique name inside the network.
     """
     def __init__(self, function):
+        update_wrapper(self, function)
         self._function = function
+
+    def __get__(self, obj, obj_type):
+        return partial(self.__call__, obj)
 
     def __call__(self, *args, **kwargs):
         node_name = args[0]
-        if NETWORK.node_exists(node_name):
+        if constants.NETWORK.node_exists(node_name):
             logger.error(f'Failed to rename node "{node_name}", Please choose different name!')
             raise NameError(f'Failed to rename node "{node_name}", Please choose different name!')
         self._function(*args, **kwargs)
@@ -38,8 +44,9 @@ class RegisterConnection:
             raise KeyError("source_plug or destination_plug not given to create connection")
 
         connection = self._connection_class(**kwargs)
-        logger.debug(f'Registering connection "{connection.name}" to network "{NETWORK.name}"')
-        NETWORK.add_connection(connection)
+        logger.debug(f'Registering connection "{connection.name}" to network "{constants.NETWORK.name}"')
+        constants.NETWORK.add_connection(connection)
+        return connection
 
 
 class DeRegisterConnection:
@@ -62,19 +69,22 @@ class RegisterNode:
     def __init__(self, node_class):
         self._node_class = node_class
 
+    def __get__(self, obj, obj_type):
+        return partial(self.__call__, obj)
+
     def __call__(self, **kwargs):
         name = kwargs.get("name")
         if not name:
             logger.error('Failed to register node without a name!')
             raise NameError('Failed to register node without a name!')
 
-        if NETWORK.node_exists(name):
+        if constants.NETWORK.node_exists(name):
             logger.error(f'Failed to register node "{name}" as node with same name already exists!')
             raise NameError(f'Failed to register node "{name}" as node with same name already exists!')
 
-        logger.debug(f'Registering node "{name}" to network "{NETWORK.name}"')
         node = self._node_class(**kwargs)
-        NETWORK.add_node(node)
+        constants.NETWORK.add_node(node)
+        return node
 
 
 class RegisterInputPlug:
@@ -101,3 +111,4 @@ class RegisterInputPlug:
         plug = self._input_plug_class(**kwargs)
         logger.debug(f'Registering Plug "{node.name}.{name}" to node "{node.name}"')
         node.add_plug(plug)
+        return plug
