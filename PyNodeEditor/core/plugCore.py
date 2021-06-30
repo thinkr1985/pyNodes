@@ -2,7 +2,7 @@
 import logging
 
 from nodeLogger import get_node_logger
-from registry import RegisterInputPlug
+
 logger = get_node_logger(__file__)
 
 
@@ -15,7 +15,7 @@ class Plug(object):
             **kwargs (any): Keyword arguments of this class.
         """
         self._node = kwargs.get("node")
-        self._name = kwargs.get("name")
+        self._name = kwargs.get("name").strip()
         self._value = kwargs.get("value")
         self._keys = {0: self._value}
         self._node_type = 'plug'
@@ -101,6 +101,10 @@ class Plug(object):
         """
         return self._keys.get(0)
 
+    def update_children(self):
+        """This method supposed to overwrite in InputPlug and OutputPlug classes."""
+        pass
+
     @value.setter
     def value(self, value):
         """
@@ -113,14 +117,16 @@ class Plug(object):
         """
         if self._value == value:
             return
-        logger.info(f'setting {self.name} s value to {value}')
+        logger.info(f'Setting "{self._node.name}.{self.name}" s value to {value}')
         self._value = value
         self._keys.update({0: value})
 
-        if self != self._node.output_plug:
-            self._node.evaluate()
-        elif self == self._node.output_plug:
+        if self.node_type == "outputPlug":
+            self.update_children()
             self._node.evaluate_children()
+
+        elif self.node_type == "inputPlug":
+            self._node.evaluate()
 
     @property
     def keys(self):
@@ -257,8 +263,9 @@ class InputPlug(Plug):
         Returns:
             None: Returns None.
         """
-        logger.debug(f'Connecting plug "{connection_object.source_node.name}.{connection_object.source_plug.name}" to "'
-                     f'"{self.node.name}.{self.name}"')
+        logger.debug(f'Connecting InputPlug "{connection_object.source_node.name}'
+                     f'.{connection_object.source_plug.name}" '
+                     f'to "{self.node.name}.{self.name}"')
         self._connection = connection_object
 
     def disconnect_plug(self):
@@ -289,7 +296,7 @@ class OutputPlug(Plug):
             **kwargs (Any): Any parameters which needs to pass to this class.
         """
         super().__init__(**kwargs)
-        self._connections = None
+        self._connections = list()
         self._node_type = 'outputPlug'
 
     def __repr__(self):
@@ -324,6 +331,19 @@ class OutputPlug(Plug):
         if self._connections:
             return True
 
+    def update_children(self):
+        """
+        This method updates the connected plug's value to this plug's value.
+        Returns:
+            None: Returns None.
+        """
+        if self.is_connected:
+            for connection in self._connections:
+                logger.debug(f'Updating value of plug "{connection.destination_plug.node.name}.'
+                             f'{connection.destination_plug.name}" to {self.value}')
+
+                connection.destination_plug.value = self.value
+
     def add_connection(self, connection_object):
         """
         Adds the connection to this plug
@@ -333,16 +353,23 @@ class OutputPlug(Plug):
         Returns:
             None: Returns None.
         """
-        for con in self._connections:
-            if con.source_plug.name == self.name:
-                logger.error(f'Failed to connect, connection from "{connection_object.source_node.name}'
-                             f'.{connection_object.source_plug.name}" already exists in the plug "{self.node.name}.'
-                             f'{self.name}"')
-                raise ConnectionError
-            else:
-                logger.debug(f'Connecting to plug "{self.node.name}.{self.name}" to "'
-                             f'{connection_object.destination_node.name}.{connection_object.destination_plug.name}"')
-                self._connections.append(connection_object)
+        if self._connections:
+            for con in self._connections:
+                if con.__str__ == connection_object.__str__:
+                    logger.error(f'Failed to add connection to Output plug ".{self.__str__}"')
+                    raise ConnectionError(f'"{connection_object.__str__}" already present in the plug "{self.__str__}"')
+
+                if con.destination_plug.name == self.name:
+                    logger.error('Failed to add connection, source plug and destination plug cant be same!')
+                    raise ConnectionError(f'Cant connect "{self.node.name}.{self.name}" to "'
+                                          f'{con.destination_plug.node.name}.{con.destination_plug.name}"')
+                else:
+                    logger.debug(f'Connecting output to plug "{self.node.name}.{self.name}" to "'
+                                 f'{connection_object.destination_node.name}.{connection_object.destination_plug.name}"')
+                    self._connections.append(connection_object)
+                    break
+        else:
+            self._connections.append(connection_object)
 
     def disconnect_plug(self, connection_object):
         """

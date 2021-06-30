@@ -9,7 +9,7 @@ from nodeLogger import get_node_logger
 logger = get_node_logger(__file__)
 
 
-def read_file(file_path=None):
+def read_file(file_path: str = None):
     if os.path.exists(file_path):
         with open(file_path, 'r') as rp:
             return rp.readlines()
@@ -18,7 +18,7 @@ def read_file(file_path=None):
         raise FileExistsError(f'File {file_path} does not exists!')
 
 
-def read_json(json_path=None):
+def read_json(json_path: str = None):
     """This function reads the given json file.
     Args:
         json_path (str): json file path in string format.
@@ -35,7 +35,7 @@ def read_json(json_path=None):
         raise FileExistsError(f'File {json_path} does not exists!')
 
 
-def write_json(path, data):
+def write_json(path: str, data: dict):
     """This function writes provided dictionary object into json format.
     Args:
         path (str): Full file path where you want to write json.
@@ -87,7 +87,7 @@ def etree_to_dict(xml_tree):
     return final_dict
 
 
-def convert_xml_to_dict(xml_path):
+def convert_xml_to_dict(xml_path: str):
     """This function converts given XML to dictionary.
     Args:
         xml_path (str): Full path of XML file.

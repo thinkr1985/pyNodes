@@ -19,6 +19,7 @@ class Connection(object):
         self._source_node = self._source_plug.node
         self._destination_node = self._destination_plug.node
         self._node_type = 'connection'
+        self._destination_plug.value = self._source_plug.value
 
     def __repr__(self):
         """Presentation of this class"""

@@ -7,7 +7,7 @@ from nodeLogger import get_node_logger
 logger = get_node_logger(__file__)
 
 
-class NameCheck:
+class NameCheck(object):
     """Creating a NameCheck decorator class.
         Calling this class as decorator to your node rename functions makes sure
         that the node you are renaming have a unique name inside the network.
@@ -27,7 +27,7 @@ class NameCheck:
         self._function(*args, **kwargs)
 
 
-class RegisterConnection:
+class RegisterConnection(object):
     """Creating RegisterConnection decorator class.
         Calling this class as decorator to your connection object validates the
         plugs before you create the class and adds the connection to the network.
@@ -43,13 +43,25 @@ class RegisterConnection:
             logger.error('Failed to create connection, "source_plug" or "destination_plug" not provided!')
             raise KeyError("source_plug or destination_plug not given to create connection")
 
+        if f"{source_plug.node.name}.{source_plug.name}" == f"{destination_plug.node.name}.{destination_plug.name}":
+            logger.error('Connection cant be made, source and destination plugs cant be same!')
+            raise ConnectionError(f'Failed to create Connection in between "{source_plug.node.name}.'
+                                  f'{source_plug.name}" and "{destination_plug.node.name}.{destination_plug.name}"')
+
+        if source_plug.node_type == destination_plug.node_type:
+            logger.error('Same type of plugs cant be connected.')
+            raise TypeError(f'Failed to connect "{source_plug.node.name}.{source_plug.name}" to'
+                            f' "{destination_plug.node.name}.{destination_plug.name}"')
+
         connection = self._connection_class(**kwargs)
         logger.debug(f'Registering connection "{connection.name}" to network "{constants.NETWORK.name}"')
         constants.NETWORK.add_connection(connection)
+        source_plug.add_connection(connection)
+        destination_plug.add_connection(connection)
         return connection
 
 
-class DeRegisterConnection:
+class DeRegisterConnection(object):
     """Creating DeRegisterConnection decorator class.
         Calling this class as decorator before your disconnect function on node makes sure
         to remove it from network.
@@ -61,11 +73,12 @@ class DeRegisterConnection:
         pass
 
 
-class RegisterNode:
+class RegisterNode(object):
     """Creating RegisterNode decorator class.
         Calling this class as decorator to Node class makes sure the node with
         same name does not exists in the network and adds the resulting node to the network.
     """
+
     def __init__(self, node_class):
         self._node_class = node_class
 
@@ -83,11 +96,12 @@ class RegisterNode:
             raise NameError(f'Failed to register node "{name}" as node with same name already exists!')
 
         node = self._node_class(**kwargs)
+        logger.debug(f'Registering node "{node.name}" to Network "{name}"')
         constants.NETWORK.add_node(node)
         return node
 
 
-class RegisterInputPlug:
+class RegisterInputPlug(object):
     """Creating a RegisterInputPlug decorator class.
         Calling this class as decorator your InputPlug class makes sure its
         unique and adds the plug to node and network.
@@ -100,7 +114,7 @@ class RegisterInputPlug:
         node = kwargs.get("node")
         value = kwargs.get("value")
 
-        if not name or not node or not value:
+        if not name or not node or type(value) is None:
             logger.error('Failed to register plug without a name/node/value!')
             raise NameError('Failed to register plug without a name/node/value!')
 

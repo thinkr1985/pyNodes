@@ -5,7 +5,7 @@ from PyNodeEditor.configs.plugs.defaults.floatPlug import FloatPlug
 
 
 @RegisterNode
-class AdditionNode(Node):
+class SubtractionNode(Node):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.cached = False
@@ -18,8 +18,8 @@ class AdditionNode(Node):
         input_1_value = self.Number1.value or 0.0
         input_2_value = self.Number2.value or 0.0
 
-        return float(input_1_value) + float(input_2_value)
+        return float(input_1_value) - float(input_2_value)
 
 
 def main():
-    return AdditionNode
+    return SubtractionNode

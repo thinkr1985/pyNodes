@@ -168,11 +168,15 @@ class Engine(object):
         py_nodes_dict = {}
 
         for category in os.listdir(nodes_dir):
-            if not os.path.isdir(os.path.join(nodes_dir, category)):
+            if category == "__pycache__":
                 continue
+            cat_dir = os.path.join(nodes_dir, category)
+            if not os.path.isdir(cat_dir):
+                continue
+
             py_nodes_dict.update({category: {}})
 
-            for node_file in os.listdir(os.path.join(nodes_dir, category)):
+            for node_file in os.listdir(cat_dir):
                 file_path = os.path.join(nodes_dir, category, node_file)
                 node_name = node_file.split(".")[0]
                 if node_file == "__init__.py":

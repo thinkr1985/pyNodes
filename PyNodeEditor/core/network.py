@@ -137,7 +137,7 @@ class Network(object):
         if self.node_exists(node.name):
             raise NameError(f'Failed to add node with name "{node.name}", Please choose different name!')
         node_type = node.node_type
-        logger.debug(f'Registering node "{node.name}" to Network "{self._name}"')
+        logger.debug(f'Adding node node "{node.name}" to Network "{self._name}"')
 
         if node_type in self._nodes:
             nodes = self._nodes[node_type]
@@ -182,6 +182,6 @@ class Network(object):
             bool: Returns True if it successfully unregister the the connection.
         """
         if connection_object.name in self._connections:
-            logger.debug(f'Unregistering connection "{connection_object.__str__()}" from network "{self._name}"')
+            logger.debug(f'Unregistering connection "{connection_object.__str__}" from network "{self._name}"')
             self._connections.pop(connection_object.name)
             return True

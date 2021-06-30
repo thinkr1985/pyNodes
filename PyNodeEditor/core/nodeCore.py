@@ -23,7 +23,7 @@ class Node(object):
         self._icon = kwargs.get("icon") or str()
         self._annotation = kwargs.get("annotation") or str()
         self._note = kwargs.get("node") or str()
-        self._cached = True
+        self._cached = False
         self._is_dirty = False
         self._node_type = 'node'
 
@@ -153,6 +153,8 @@ class Node(object):
                 dest_node = con.destination_node
                 if dest_node not in children:
                     children.append(dest_node)
+        else:
+            logger.debug(f'No children found in the node"{self._name}"')
         return children
 
     @property
@@ -348,6 +350,7 @@ class Node(object):
         self._input_plugs.append(plug)
 
     def setup_plugs(self):
+        """This method supposed to override while creating your own node."""
         pass
 
     def compute(self):
@@ -376,6 +379,7 @@ class Node(object):
                     return self._output_plug.value
             else:
                 self._output_plug.value = self.compute()
+
                 self.is_dirty = False
                 return self._output_plug.value
         except Exception as err:

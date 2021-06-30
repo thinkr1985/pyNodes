@@ -3,7 +3,10 @@ import traceback
 import importlib.util
 
 import constants
+import utils
 from nodeLogger import get_node_logger
+from connectionCore import Connection
+from nodeCore import Node
 
 logger = get_node_logger(__file__)
 
@@ -55,7 +58,7 @@ def create_node(name: str, node_type: str):
         node_type (str): type of node to create.
 
     Returns:
-        Returns the Node object.
+        Node: Returns the Node object.
     """
     if not name or not node_type:
         logger.error('Node Must have name/node-type!')
@@ -92,3 +95,43 @@ def get_all_nodes_from_network():
         dict: Returns dict containing node data.
     """
     return constants.NETWORK.nodes
+
+
+def connect_nodes(source_plug, destination_plug):
+    """
+    This function creates connection in between given plugs
+    Args:
+        source_plug: OutputPlug of the source node.
+        destination_plug: input node of the destination plug.
+
+    Returns:
+        Connection: returns the connection object.
+    """
+    if not source_plug or not destination_plug:
+        logger.error('Failed to connect nodes, source/destination plugs not provided.')
+        raise NotImplemented('Failed to connect nodes, source/destination plugs not provided.')
+
+    return Connection(source_plug=source_plug, destination_plug=destination_plug)
+
+
+def save_network(file_path):
+    """
+    This function saves the current network in the given file path.
+    Args:
+        file_path (str): Full path of the file to save network.
+
+    Returns:
+        bool: Returns True if it writes the file successfully else returns False.
+    """
+    network_dict = constants.NETWORK.as_dict()
+    try:
+        utils.write_json(file_path, network_dict)
+        return True
+    except Exception as err:
+        logger.error(f'Failed to save network : {err}')
+        logger.error(traceback.format_exc())
+
+
+def load_network_from_file(filepath):
+    pass
+
