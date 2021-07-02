@@ -12,7 +12,10 @@ def init_app():
 
 def get_all_nodes_from_app_config():
     app_node_dir = os.path.join(APP_CONFIG_PATH, "nodes")
-    node_categories = [x for x in os.listdir(app_node_dir) if os.path.isdir(os.path.join(app_node_dir, x))]
+    node_categories = [
+        x for x in os.listdir(app_node_dir)
+        if os.path.isdir(os.path.join(app_node_dir, x))
+    ]
 
 
 if __name__ == '__main__':

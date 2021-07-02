@@ -9,7 +9,9 @@ logger = get_node_logger(__file__)
 
 APP_NAME = "PyNodeEditor"
 
-APP_CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "configs")
+APP_CONFIG_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "configs"
+)
 
 GLOBAL_CONFIG_PATH = os.getenv("PYNODE_CONFIG_PATH")
 
@@ -18,7 +20,9 @@ PLATFORM = platform.system()
 USER_CONFIG_PATH = None
 
 if PLATFORM == "Windows":
-    USER_CONFIG_PATH = os.path.join(os.path.expanduser('~/Documents'), APP_NAME)
+    USER_CONFIG_PATH = os.path.join(
+        os.path.expanduser('~/Documents'), APP_NAME
+    )
 elif PLATFORM == "Linux":
     USER_CONFIG_PATH = os.path.join(str(Path.home()), APP_NAME)
 
@@ -124,7 +128,7 @@ class Engine(object):
 
     def _get_all_py_nodes(self):
         """
-        This method gets all the nodes from default, user and global directories.
+        This method gets all nodes from default, user and global directories.
         Returns:
             dict: returns the dictionary all the nodes, plugs data.
         """
