@@ -3,6 +3,8 @@ from functools import update_wrapper, partial
 
 import constants
 from nodeLogger import get_node_logger
+from exceptions import (ConnectionCreationError, NodeRegistrationError,
+                        PlugRegistrationError)
 
 logger = get_node_logger(__file__)
 
@@ -46,19 +48,13 @@ class RegisterConnection(object):
         destination_plug = kwargs.get("destination_plug")
 
         if not source_plug or not destination_plug:
-            logger.error(
+            raise ConnectionCreationError(
                 'Failed to create connection, "source_plug" or '
                 '"destination_plug" not provided!'
             )
-            raise KeyError(
-                "source / destination plugs not provided to create connection")
 
         if f"{source_plug.__str__}" == f"{destination_plug.__str__}":
-            logger.error(
-                'Connection cant be made, source and destination plugs '
-                'cant be same!'
-            )
-            raise ConnectionError(
+            raise ConnectionCreationError(
                 f'Failed to create Connection in between '
                 f'"{source_plug.node.name}.{source_plug.name}" and '
                 f'"{destination_plug.node.name}.{destination_plug.name}"'
@@ -66,8 +62,9 @@ class RegisterConnection(object):
 
         if source_plug.node_type == destination_plug.node_type:
             logger.error('Same type of plugs cant be connected.')
-            raise TypeError(
-                f'Cant connect "{source_plug.node.name}.{source_plug.name} "'
+            raise ConnectionCreationError(
+                'Same type of plugs cant be connected. '
+                f'"{source_plug.node.name}.{source_plug.name} "'
                 f'to "{destination_plug.node.name}.{destination_plug.name}"')
 
         connection = self._connection_class(**kwargs)
@@ -109,15 +106,12 @@ class RegisterNode(object):
     def __call__(self, **kwargs):
         name = kwargs.get("name")
         if not name:
-            logger.error('Failed to register node without a name!')
-            raise NameError('Failed to register node without a name!')
+            raise NodeRegistrationError(
+                'Failed to register node without a name!'
+            )
 
         if constants.NETWORK.node_exists(name):
-            logger.error(
-                f'Failed to register node "{name}" '
-                f'as node with same name already exists!'
-            )
-            raise NameError(
+            raise NodeRegistrationError(
                 f'Failed to register node "{name}" '
                 f'as node with same name already exists!'
             )
@@ -142,17 +136,15 @@ class RegisterInputPlug(object):
         value = kwargs.get("value")
 
         if not name or not node or type(value) is None:
-            logger.error('Failed to register plug without a name/node/value!')
-            raise NameError(
+            raise PlugRegistrationError(
                 'Failed to register plug without a name/node/value!'
             )
 
         if node.get_plug(name):
-            logger.error(
+            raise PlugRegistrationError(
                 f'Failed to register plug to node "{node.name}" '
                 f'as plug with same name already exists!'
             )
-            raise NameError
 
         plug = self._input_plug_class(**kwargs)
         logger.debug(

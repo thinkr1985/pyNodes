@@ -107,6 +107,5 @@ class TestNodes(unittest.TestCase):
         self.assertEqual(45, another_node.output)
 
 
-
 if __name__ == "__main__":
     unittest.main()

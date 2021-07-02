@@ -1,4 +1,4 @@
-"""Creating a simple addition node"""
+"""Creating a simple subtraction node"""
 from PyNodeEditor.core.nodeCore import Node
 from PyNodeEditor.core.registry import RegisterNode
 from PyNodeEditor.configs.plugs.defaults.floatPlug import FloatPlug
