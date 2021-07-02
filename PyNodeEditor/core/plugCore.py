@@ -102,7 +102,7 @@ class Plug(object):
         return self._keys.get(0)
 
     def update_children(self):
-        """This method supposed to overwrite in InputPlug and OutputPlug classes."""
+        """This method supposed to overwrite in its child classes."""
         pass
 
     @value.setter
@@ -117,7 +117,7 @@ class Plug(object):
         """
         if self._value == value:
             return
-        logger.info(f'Setting "{self._node.name}.{self.name}" s value to {value}')
+        logger.info(f'Setting "{self._node.name}.{self.name}" value : {value}')
         self._value = value
         self._keys.update({0: value})
 
@@ -146,9 +146,12 @@ class Plug(object):
             self.plug_type: returns value at the frame.
         """
         if not isinstance(frame_number, int):
-            logger.error(msg='Frame number should of type "int" to get key value')
+            logger.error('Frame number should of type "int" to get key value')
             raise TypeError
-        logging.debug(f'Getting key value on frame {frame_number} from plug "{self._node.name}.{self._name}"')
+        logging.debug(
+            f'Getting key value on frame {frame_number} '
+            f'from plug "{self._node.name}.{self._name}"'
+        )
         return self._keys.get(frame_number)
 
     def set_key(self, frame_number: int, value):
@@ -167,13 +170,15 @@ class Plug(object):
 
         if not isinstance(value, self.plug_type):
             logger.error(
-                msg=f'Failed to set key as given value is not of {self.plug_type} type.'
+                f'Failed to set key as given value is not of'
+                f' {self.plug_type} type.'
             )
             raise TypeError
         if not value:
             value = self.value
         logger.debug(
-            f'Setting key on plug "{self._node.name}.{self._name}" on frame {frame_number} with value "{value}"'
+            f'Setting key on plug "{self._node.name}.{self._name}"'
+            f' on frame {frame_number} with value "{value}"'
         )
         self._keys.update({frame_number: value})
 
@@ -190,7 +195,10 @@ class Plug(object):
             logger.error(msg='Frame number should of type "int" to remove key')
             raise TypeError
         if frame_number in self._keys:
-            logger.debug(f'Removing key on plug "{self._node.name}.{self._name}" on frame {frame_number}')
+            logger.debug(
+                f'Removing key on plug "{self._node.name}.{self._name}" '
+                f'on frame {frame_number}'
+            )
             self._keys.pop(frame_number)
 
     @property
@@ -263,9 +271,11 @@ class InputPlug(Plug):
         Returns:
             None: Returns None.
         """
-        logger.debug(f'Connecting InputPlug "{connection_object.source_node.name}'
-                     f'.{connection_object.source_plug.name}" '
-                     f'to "{self.node.name}.{self.name}"')
+        logger.debug(
+            f'Connecting InputPlug "{connection_object.source_node.name}.'
+            f'{connection_object.source_plug.name}" to '
+            f'"{self.node.name}.{self.name}"'
+        )
         self._connection = connection_object
 
     def disconnect_plug(self):
@@ -275,8 +285,11 @@ class InputPlug(Plug):
             bool: Returns True if disconnected else False.
         """
         if self._connection:
-            logger.info(f'Disconnecting "{self.node.name}.{self.name}" from "{self._connection.source_node.name}.'
-                        f'{self._connection.source_plug.name}"')
+            logger.info(
+                f'Disconnecting "{self.node.name}.{self.name}" from '
+                f'"{self._connection.source_node.name}.'
+                f'{self._connection.source_plug.name}"'
+            )
             self._connection = None
             self.node.evaluate()
             return True
@@ -339,8 +352,11 @@ class OutputPlug(Plug):
         """
         if self.is_connected:
             for connection in self._connections:
-                logger.debug(f'Updating value of plug "{connection.destination_plug.node.name}.'
-                             f'{connection.destination_plug.name}" to {self.value}')
+                logger.debug(
+                    f'Updating value of plug '
+                    f'"{connection.destination_plug.node.name}.'
+                    f'{connection.destination_plug.name}" to {self.value}'
+                )
 
                 connection.destination_plug.value = self.value
 
@@ -348,7 +364,7 @@ class OutputPlug(Plug):
         """
         Adds the connection to this plug
         Args:
-            connection_object (Connection): Connection object to add to this plug.
+            connection_object (Connection): Connection to add into this plug.
 
         Returns:
             None: Returns None.
@@ -356,16 +372,31 @@ class OutputPlug(Plug):
         if self._connections:
             for con in self._connections:
                 if con.__str__ == connection_object.__str__:
-                    logger.error(f'Failed to add connection to Output plug ".{self.__str__}"')
-                    raise ConnectionError(f'"{connection_object.__str__}" already present in the plug "{self.__str__}"')
+                    logger.error(
+                        f'Failed to add connection to Output plug "'
+                        f'.{self.__str__}"'
+                    )
+                    raise ConnectionError(
+                        f'"{connection_object.__str__}" already present '
+                        f'in the plug "{self.__str__}"'
+                    )
 
                 if con.destination_plug.name == self.name:
-                    logger.error('Failed to add connection, source plug and destination plug cant be same!')
-                    raise ConnectionError(f'Cant connect "{self.node.name}.{self.name}" to "'
-                                          f'{con.destination_plug.node.name}.{con.destination_plug.name}"')
+                    logger.error(
+                        'Failed to add connection, source plug and '
+                        'destination plug cant be same!'
+                    )
+                    raise ConnectionError(
+                        f'Cant connect "{self.node.name}.{self.name}" to "'
+                        f'{con.destination_plug.node.name}.'
+                        f'{con.destination_plug.name}"'
+                    )
                 else:
-                    logger.debug(f'Connecting output to plug "{self.node.name}.{self.name}" to "'
-                                 f'{connection_object.destination_node.name}.{connection_object.destination_plug.name}"')
+                    logger.debug(
+                        f'Connecting output plug"{self.node.name}.{self.name}"'
+                        f' to "{connection_object.destination_node.name}.'
+                        f'{connection_object.destination_plug.name}"'
+                    )
                     self._connections.append(connection_object)
                     break
         else:
@@ -386,13 +417,22 @@ class OutputPlug(Plug):
                     index = num
                     break
             if index or index == 0:
-                logger.info(f'Disconnecting "{self.node.name}.{self.name}" from "'
-                            f'{connection_object.destination_node.name}.{connection_object.destination_plug.name}"')
+                logger.info(
+                    f'Disconnecting "{self.node.name}.{self.name}" from "'
+                    f'{connection_object.destination_node.name}.'
+                    f'{connection_object.destination_plug.name}"'
+                )
                 self._connections.pop(index)
                 self.node.evaluate_children()
                 return True
             else:
-                logger.error(f'Failed to remove connection from "{self.node.name}.{self.name}"')
+                logger.error(
+                    f'Failed to remove connection from '
+                    f'"{self.node.name}.{self.name}"'
+                )
 
         else:
-            logger.error(f'Failed to remove connection from "{self.node.name}.{self.name}"')
+            logger.error(
+                f'Failed to remove connection from '
+                f'"{self.node.name}.{self.name}"'
+            )

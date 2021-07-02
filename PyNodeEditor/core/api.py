@@ -20,16 +20,20 @@ def get_object_types_from_engine(object_type="nodes"):
     Returns:
         list: Returns list containing all node types in string format.
     """
-    if object_type in ("nodes", "plugs"):
-        object_types = []
-        for category, subcategory in constants.ENGINE.get_objects(object_type).items():
-            if subcategory:
-                for category_name, objects in subcategory.items():
-                    object_types.extend(objects)
-        return object_types
-    else:
-        logger.error(f'Undefined object type "{object_type}", valid object types are "nodes", "plugs"!')
+    if object_type not in ("nodes", "plugs"):
+        logger.error(
+            f'Undefined object type "{object_type}",'
+            f' valid object types are "nodes", "plugs"!'
+        )
         raise TypeError
+
+    object_types = []
+    objects = constants.ENGINE.get_objects(object_type)
+    for category, subcategory in objects.items():
+        if subcategory:
+            for category_name, objects in subcategory.items():
+                object_types.extend(objects)
+    return object_types
 
 
 def get_engine_node_types():
@@ -66,8 +70,13 @@ def create_node(name: str, node_type: str):
 
     engine_node_types = get_engine_node_types()
     if node_type not in engine_node_types:
-        logger.error(f'Failed to create node, node-type "{node_type}" is not registered with the engine.')
-        raise TypeError(f'Node-type "{node_type}" is not registered with the engine.')
+        logger.error(
+            f'Failed to create node, node-type "{node_type}" '
+            f'is not registered with the engine.'
+        )
+        raise TypeError(
+            f'Node-type "{node_type}" is not registered with the engine.'
+        )
 
     logger.info(f'Creating "{node_type}" node with name "{name}"')
 
@@ -77,13 +86,16 @@ def create_node(name: str, node_type: str):
                 if node_type in objects:
                     node_file = objects.get(node_type)
                     try:
-                        module_source = importlib.util.spec_from_file_location("module.name", node_file)
+                        module_source = importlib.util.spec_from_file_location(
+                            "module.name", node_file)
                         module = importlib.util.module_from_spec(module_source)
                         module_source.loader.exec_module(module)
                         object_ = module.main()
                         return object_(name=name)
                     except Exception as err:
-                        logger.error(f'Failed to create Node {name} with error : {err}')
+                        logger.error(
+                            f'Failed to create Node {name} with error : {err}'
+                        )
                         logger.error(traceback.format_exc())
                         return
 
@@ -108,10 +120,18 @@ def connect_nodes(source_plug, destination_plug):
         Connection: returns the connection object.
     """
     if not source_plug or not destination_plug:
-        logger.error('Failed to connect nodes, source/destination plugs not provided.')
-        raise NotImplemented('Failed to connect nodes, source/destination plugs not provided.')
+        logger.error(
+            'Failed to connect nodes, source/destination plugs not provided.'
+        )
+        raise NotImplemented(
+            'Failed to connect nodes, source/destination plugs not provided.'
+        )
 
-    return Connection(source_plug=source_plug, destination_plug=destination_plug)
+    connection = Connection(
+        source_plug=source_plug,
+        destination_plug=destination_plug
+    )
+    return connection
 
 
 def save_network(file_path):
@@ -121,7 +141,7 @@ def save_network(file_path):
         file_path (str): Full path of the file to save network.
 
     Returns:
-        bool: Returns True if it writes the file successfully else returns False.
+        bool: Returns True on successful write else returns False.
     """
     network_dict = constants.NETWORK.as_dict()
     try:
@@ -134,4 +154,3 @@ def save_network(file_path):
 
 def load_network_from_file(filepath):
     pass
-

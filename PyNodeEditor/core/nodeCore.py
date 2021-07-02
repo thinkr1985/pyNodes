@@ -67,7 +67,10 @@ class Node(object):
                 return item
 
         if not found:
-            logger.error(f'Plug not exists with name "{plug_name}" in the node "{self._name}"')
+            logger.error(
+                f'Plug not exists with name "{plug_name}" '
+                f'in the node "{self._name}"'
+            )
             raise NameError
 
     def _dict(self):
@@ -248,7 +251,9 @@ class Node(object):
             None: Returns None.
         """
         self._annotation = str(annotation_text)
-        logger.info(f'Annotation for node "{self._name}" set to {annotation_text}')
+        logger.info(
+            f'Annotation for node "{self._name}" set to {annotation_text}'
+        )
 
     @property
     def note(self):
@@ -315,13 +320,19 @@ class Node(object):
         Returns:
             (Node): Returns the Node object.
         """
-        logger.debug(f'Getting child with name "{child_node_name}" from the node "{self._name}"')
+        logger.debug(
+            f'Getting child with name "{child_node_name}" '
+            f'from the node "{self._name}"'
+        )
         found = False
         for child in self.children():
             if child.name == child_node_name:
                 return child
         if not found:
-            logger.error(f'Failed to find child with name "{child_node_name}" in the node "{self._name}"')
+            logger.error(
+                f'Failed to find child with name "{child_node_name}" '
+                f'in the node "{self._name}"'
+            )
             raise NameError
 
     def get_plug(self, plug_name: str):
@@ -333,7 +344,8 @@ class Node(object):
         Returns:
             InputPlug: returns the matching plug object.
         """
-        logger.debug(f'Getting plug with name "{plug_name}" from the node "{self._name}"')
+        logger.debug(
+            f'Getting plug "{plug_name}" from the node "{self._name}"')
         for plug_ in self._input_plugs:
             if plug_.name == plug_name:
                 return plug_
@@ -367,7 +379,7 @@ class Node(object):
         Returns:
             Returns the result of computation.
         """
-        logger.debug(f'Evaluating Node "{self.name}" in cached state:{self._cached}')
+        logger.debug(f'Evaluating Node "{self.name}" in state:{self._cached}')
 
         try:
             if self.cached:
@@ -393,6 +405,6 @@ class Node(object):
         Returns:
             None: Returns None.
         """
-        logger.debug(f'Triggering evaluation of children of node "{self._name}"')
+        logger.debug(f'Trigger Evaluation of children of node "{self._name}"')
         for child in self.children():
             child.evaluate()

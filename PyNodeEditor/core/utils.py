@@ -100,3 +100,27 @@ def convert_xml_to_dict(xml_path: str):
     read_ = read_file(xml_path)
     dict_ = etree_to_dict(cElementTree.XML(str(read_)))
     return dict_
+
+
+def get_all_module_files(file_ext=".py"):
+    """
+    This function gets all the file with given extension from this app.
+    Args:
+        file_ext (str): extension of the files to find (".py", ".txt"..etc)
+
+    Returns:
+        list: Returns list containing files with given extension.
+    """
+    module_path = os.path.join(os.path.dirname(os.path.dirname(__file__)))
+    python_files = []
+
+    for root, sub_dirs, files in os.walk(module_path):
+        for file_ in files:
+            if file_ in ["test.py", "tests.py"]:
+                continue
+            if file_.endswith(file_ext):
+                full_path = os.path.join(root, file_)
+                if "__pycache__" in full_path:
+                    continue
+                python_files.append(full_path)
+    return python_files

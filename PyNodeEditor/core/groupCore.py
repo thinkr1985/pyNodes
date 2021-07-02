@@ -149,8 +149,8 @@ class Group(object):
         for node in self._nodes:
             if node.name == node_object.name:
                 logger.error(
-                    f'Failed to add Node to Group, Node "{node_object.name}" is already a member of "{self._name}" '
-                    f'group.'
+                    f'Failed to add Node to Group, Node "{node_object.name}" '
+                    f'is already a member of "{self._name}" group.'
                 )
                 return
         self._nodes.append(node_object)

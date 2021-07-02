@@ -106,7 +106,8 @@ class Network(object):
             connection_object: Connection object.
 
         Returns:
-            bool: returns True if connection is present in network else returns False.
+            bool: returns True if connection is present in network
+             else returns False.
         """
         if connection_object.name in self._connections:
             return True
@@ -135,9 +136,14 @@ class Network(object):
             bool: Returns True of node gets added to network.
         """
         if self.node_exists(node.name):
-            raise NameError(f'Failed to add node with name "{node.name}", Please choose different name!')
+            raise NameError(
+                f'Failed to add node with name "{node.name}",'
+                f' Please choose different name!'
+            )
         node_type = node.node_type
-        logger.debug(f'Adding node node "{node.name}" to Network "{self._name}"')
+        logger.debug(
+            f'Adding node node "{node.name}" to Network "{self._name}"'
+        )
 
         if node_type in self._nodes:
             nodes = self._nodes[node_type]
@@ -179,9 +185,12 @@ class Network(object):
             connection_object: conection object.
 
         Returns:
-            bool: Returns True if it successfully unregister the the connection.
+            bool: Returns True if it successfully unregisters the connection.
         """
         if connection_object.name in self._connections:
-            logger.debug(f'Unregistering connection "{connection_object.__str__}" from network "{self._name}"')
+            logger.debug(
+                f'Unregistering connection "{connection_object.__str__}" '
+                f'from network "{self._name}"'
+            )
             self._connections.pop(connection_object.name)
             return True
