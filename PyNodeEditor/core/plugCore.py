@@ -290,6 +290,7 @@ class InputPlug(Plug):
                 f'"{self._connection.source_node.name}.'
                 f'{self._connection.source_plug.name}"'
             )
+            self._connection.source_plug.disconnect_plug(self._connection)
             self._connection = None
             self.node.evaluate()
             return True

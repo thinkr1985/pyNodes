@@ -134,6 +134,22 @@ def connect_nodes(source_plug, destination_plug):
     return connection
 
 
+def disconnect_plug(plug):
+    """
+    This function disconnects given plug.
+    Args:
+        plug (Plug): InputPlug object.
+
+    Returns:
+        bool: Returns True it successfully disconnects else returns False.
+    """
+    if plug.node_type != "inputPlug":
+        logger.error(f'failed to disconnect "{plug.node.name}.{plug.name}"'
+                     f'is not a inputType Plug!')
+        raise TypeError
+    return plug.disconnect_plug()
+
+
 def save_network(file_path):
     """
     This function saves the current network in the given file path.

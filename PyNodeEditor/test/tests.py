@@ -11,7 +11,7 @@ logger = get_node_logger(__file__)
 
 class TestNodes(unittest.TestCase):
 
-    def test_pep8_syntaxt(self):
+    def test_pep8_syntax(self):
         """Test that we conform to PEP8."""
         pep8style = pep8.StyleGuide(quiet=False)
         module_files = utils.get_all_module_files(file_ext=".py")
@@ -50,7 +50,6 @@ class TestNodes(unittest.TestCase):
          add_node   +   another_node
         '''
 
-        self.assertEqual(11, another_node.Number1.value)
         self.assertEqual(11, another_node.Number2.value)
         self.assertEqual(22, another_node.output)
 
@@ -64,22 +63,21 @@ class TestNodes(unittest.TestCase):
          add_node   +   another_node
         '''
         self.assertEqual(16, another_node.Number1.value)
-        self.assertEqual(16, another_node.Number2.value)
         self.assertEqual(32, another_node.output)
 
+        api.disconnect_plug(another_node.Number1)
         add_node.Number1.value = 45
-        add_node.Number2.value = 50
 
-        self.assertEqual(95, another_node.Number1.value)
-        self.assertEqual(95, another_node.Number2.value)
-        self.assertEqual(190, another_node.output)
+        self.assertEqual(16, another_node.Number1.value)
+        self.assertEqual(51, another_node.Number2.value)
+        self.assertEqual(67, another_node.output)
 
-    def test_substract_node(self):
+    def test_subtract_node(self):
         add_node = api.create_node(
-            name="MyTestNode", node_type="subtraction"
+            name="MyTestNode2", node_type="subtraction"
         )
         another_node = api.create_node(
-            name="MyExtraNode", node_type="subtraction"
+            name="MyExtraNode2", node_type="subtraction"
         )
 
         add_node.Number1.value = 5
@@ -101,11 +99,13 @@ class TestNodes(unittest.TestCase):
         self.assertEqual(2, another_node.Number2.value)
         self.assertEqual(0, another_node.output)
 
+        api.disconnect_plug(another_node.Number2)
         add_node.Number1.value = 50
 
         self.assertEqual(47, another_node.Number1.value)
-        self.assertEqual(47, another_node.Number2.value)
-        self.assertEqual(0, another_node.output)
+        self.assertEqual(2, another_node.Number2.value)
+        self.assertEqual(45, another_node.output)
+
 
 
 if __name__ == "__main__":
