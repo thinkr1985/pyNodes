@@ -1,10 +1,13 @@
 """Creating Group class"""
 from nodeLogger import get_node_logger
-from registry import NameCheck, RegisterNode
+from registry import CheckDuplicateRegistryName, RegisterGroup, RegisterTime
+from exceptions import MissingPlugError
+from constants import DEFAULT_GROUP_ICON
+
 logger = get_node_logger(__file__)
 
 
-@RegisterNode
+@RegisterGroup
 class Group(object):
     """Creating a Group class"""
     def __init__(self, **kwargs):
@@ -13,15 +16,20 @@ class Group(object):
         Args:
             **kwargs: keyword arguments of this class.
         """
-        self._name = kwargs.get("name")
+        self._name = kwargs.get("name").strip()
         self._nodes = kwargs.get("nodes") or list()
         self._node_type = 'group'
-        self._annotation = str()
-        self._note = str()
+        self._annotation = kwargs.get("annotation") or str()
+        self._note = kwargs.get("note") or str()
+        self._input_plugs = list()
+        self._output_plugs = list()
+        self._cached = False
+        self._is_dirty = False
+        self._icon = kwargs.get("icon") or DEFAULT_GROUP_ICON
 
     def __repr__(self):
         """Representing this class"""
-        return f'Group({self._name})'
+        return f'Group({self._name}) at {hex(id(self))}'
 
     def __str__(self):
         """String presentation of this class"""
@@ -33,6 +41,35 @@ class Group(object):
         yield 'nodes', [node.as_dict() for node in self._nodes]
         yield 'note', self._note
         yield 'annotation', self._annotation
+        yield 'inputPlugs', self._input_plugs
+        yield 'outputPlugs', self._output_plugs
+        yield 'icon', self._icon
+        yield 'isDirty', self._is_dirty
+        yield 'cached', self._cached
+
+    def __getattr__(self, plug_name: str):
+        """
+        setting getattr method to get input plugs
+        Args:
+            plug_name (str): Name of the plug.
+
+        Returns:
+            InputPlug: Returns the Input Plug object.
+        """
+        found = False
+        for item in self._input_plugs:
+            if item.name == plug_name:
+                return item
+
+        for item in self._output_plugs:
+            if item.name == plug_name:
+                return item
+
+        if not found:
+            raise MissingPlugError(
+                f'Plug not exists with name "{plug_name}" '
+                f'in the node "{self._name}"'
+            )
 
     @property
     def name(self):
@@ -43,7 +80,7 @@ class Group(object):
         """
         return self._name
 
-    @NameCheck
+    @CheckDuplicateRegistryName
     def rename(self, name: str):
         """
         This method renames the group
@@ -53,8 +90,16 @@ class Group(object):
         Returns:
             None: Returns None.
         """
-        logger.debug(f'Renaming group "{self._name}" to "{name}"')
-        self._name = name
+        logger.debug(f'Renaming group "{self._name}" to "{name.strip()}"')
+        self._name = str(name).strip()
+
+    @property
+    def input_plugs(self):
+        return self._input_plugs
+
+    @property
+    def output_plugs(self):
+        return self._output_plugs
 
     @property
     def note(self):
@@ -116,6 +161,51 @@ class Group(object):
         """
         return self._node_type
 
+    @property
+    def cached(self):
+        """
+        This property gets the cached state of the group.
+        Returns:
+            bool: Returns True if the group's cached mode on ON.
+        """
+        return self._cached
+
+    @cached.setter
+    def cached(self, value: bool):
+        """
+        This method set the cached state of the group.
+        Args:
+            value (bool): Value to set for cached attribute of the group.
+
+        Returns:
+            None: Returns None.
+        """
+        if isinstance(value, bool):
+            self._cached = value
+            logger.info(f'Cache state set for group "{self._name}" to {value}')
+
+    @property
+    def is_dirty(self):
+        """
+        This property checks if group is dirty.
+        Returns:
+            bool: Returns True if its dirty else returns False.
+        """
+        return self._is_dirty
+
+    @is_dirty.setter
+    def is_dirty(self, value: bool):
+        """
+        This method sets the group's dirty status.
+        Args:
+            value (bool): True / False.
+
+        Returns:
+            None: Returns None.
+        """
+        if isinstance(value, bool):
+            self._is_dirty = value
+
     def _dict(self):
         """
         This method casts this node to dictionary format.
@@ -126,8 +216,35 @@ class Group(object):
             'name': self._name,
             'nodes': [node.as_dict() for node in self._nodes],
             'note': self._note,
-            'annotation': self._annotation
+            'annotation': self._annotation,
+            'inputPlugs': self._input_plugs,
+            'outputPlugs': self._output_plugs,
+            'icon': self._icon,
+            'isDirty': self._is_dirty,
+            'cached': self._cached
         }
+
+    @property
+    def icon(self):
+        """
+        This property gets node's the icon path.
+        Returns:
+            str: returns the node's icon path.
+        """
+        return self._icon
+
+    @icon.setter
+    def icon(self, icon_path: str):
+        """
+        This method sets the icon path of the node.
+        Args:
+            icon_path (str): Icon file's full path.
+
+        Returns:
+            None: Returns Node.
+        """
+        self._icon = icon_path
+        logger.info(f'Icon path for node "{self._name}" set to {icon_path}')
 
     def as_dict(self):
         """
@@ -137,21 +254,31 @@ class Group(object):
         """
         return self._dict()
 
-    def add_node(self, node_object):
+    def compute(self):
         """
-        This method adds the given node to the class.
-        Args:
-            node_object (Node): Node object to add inside this group.
+        This method computes the result of all inputs.
+        Returns:
 
+        """
+        pass
+
+    @RegisterTime
+    def evaluate(self):
+        """
+        This method calls compute method to evaluate the node.
+        Returns:
+            Returns the result of computation.
+        """
+        logger.debug(f'Evaluating Node "{self.name}" in state:{self._cached}')
+
+        pass
+
+    def evaluate_children(self):
+        """
+        This method evaluates all its children
         Returns:
             None: Returns None.
         """
-        for node in self._nodes:
-            if node.name == node_object.name:
-                logger.error(
-                    f'Failed to add Node to Group, Node "{node_object.name}" '
-                    f'is already a member of "{self._name}" group.'
-                )
-                return
-        self._nodes.append(node_object)
-        # TODO
+        logger.debug(f'Trigger Evaluation of children of node "{self._name}"')
+        for child in self.nodes:
+            child.evaluate()

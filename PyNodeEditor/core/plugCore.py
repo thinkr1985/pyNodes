@@ -238,7 +238,8 @@ class InputPlug(Plug):
 
     def __repr__(self):
         """Representation of this class."""
-        return f'InputPlug({self.name},{self.value}, {self.node.name})'
+        return f'InputPlug({self.name},{self.value}, {self.node.name})' \
+               f' at {hex(id(self))}'
 
     def __str__(self):
         """String representation of the class."""

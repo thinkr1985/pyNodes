@@ -1,9 +1,10 @@
 """Module to create Node class"""
-import traceback
 
 from nodeLogger import get_node_logger
 from plugCore import OutputPlug
-from registry import NameCheck
+from registry import CheckDuplicateRegistryName, RegisterTime
+from exceptions import ComputeError, MissingPlugError
+from constants import DEFAULT_NODE_ICON
 
 logger = get_node_logger(__file__)
 
@@ -17,10 +18,10 @@ class Node(object):
             name (str): Name of the Node.
             **kwargs : Extra parameters to pass this class.
         """
-        self._name = kwargs.get("name")
+        self._name = kwargs.get("name").strip()
         self._input_plugs = list()
         self._output_plug = OutputPlug(node=self, name="Out", value=None)
-        self._icon = kwargs.get("icon") or str()
+        self._icon = kwargs.get("icon") or DEFAULT_NODE_ICON
         self._annotation = kwargs.get("annotation") or str()
         self._note = kwargs.get("node") or str()
         self._cached = False
@@ -31,7 +32,8 @@ class Node(object):
 
     def __repr__(self):
         """Representing this class"""
-        return f'Node({self._name}, {self._annotation}, {self._note})'
+        return f'Node({self._name}, {self._annotation}, {self._note}) ' \
+               f'at {hex(id(self))}'
 
     def __str__(self):
         """Representing this class in string format"""
@@ -67,11 +69,10 @@ class Node(object):
                 return item
 
         if not found:
-            logger.error(
+            raise MissingPlugError(
                 f'Plug not exists with name "{plug_name}" '
                 f'in the node "{self._name}"'
             )
-            raise NameError
 
     def _dict(self):
         """
@@ -116,7 +117,7 @@ class Node(object):
         """
         return self._name
 
-    @NameCheck
+    @CheckDuplicateRegistryName
     def rename(self, name: str):
         """
         This method sets the name of node.
@@ -126,8 +127,8 @@ class Node(object):
         Returns:
             None: Returns None.
         """
-        logger.debug(f'Renaming node "{self._name}" to "{name}"')
-        self._name = str(name)
+        logger.debug(f'Renaming node "{self._name}" to "{name.strip()}"')
+        self._name = str(name).strip()
 
     def parents(self):
         """
@@ -373,6 +374,7 @@ class Node(object):
         """
         pass
 
+    @RegisterTime
     def evaluate(self):
         """
         This method calls compute method to evaluate the node.
@@ -395,8 +397,7 @@ class Node(object):
                 self.is_dirty = False
                 return self._output_plug.value
         except Exception as err:
-            logger.error(f'Failed to compute node "{self.name}": {err}')
-            logger.error(msg=traceback.format_exc())
+            ComputeError(f'Failed to compute node "{self.name}": {err}')
             self._is_dirty = True
 
     def evaluate_children(self):
@@ -408,3 +409,39 @@ class Node(object):
         logger.debug(f'Trigger Evaluation of children of node "{self._name}"')
         for child in self.children():
             child.evaluate()
+
+    def get_upstream_dependencies(self):
+        """
+        This method recursively gets the all the nodes from its all upstream
+        dependencies.
+        Returns:
+            list: Returns list containing upstream dependency nodes.
+        """
+        logger.debug(f'Getting upstream dependencies of "{self._name}"')
+        dependencies = list()
+        for plug in self._input_plugs:
+            if not plug.connection:
+                continue
+            source_node = plug.connection.source_node
+            _dependencies = source_node.get_upstream_dependencies()
+            if _dependencies:
+                dependencies.extend(_dependencies)
+        return dependencies
+
+    def get_downstream_dependencies(self):
+        """
+        This method recursively gets the all the nodes from its all down
+        stream dependencies.
+        Returns:
+            list: Returns list containing down stream dependency nodes.
+        """
+        logger.debug(f'Getting downstream dependencies of "{self._name}"')
+        dependencies = list()
+        if not self._output_plug.connections:
+            return
+        for connection in self._output_plug.connections:
+            destination_node = connection.destination_node
+            _dependencies = destination_node.get_downstream_dependencies()
+            if _dependencies:
+                dependencies.extend(_dependencies)
+        return dependencies

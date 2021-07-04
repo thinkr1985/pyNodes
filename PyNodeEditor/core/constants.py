@@ -13,3 +13,7 @@ ENGINE = Engine()
 DEFAULT_NODES = {}
 
 ICON_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "icons")
+
+DEFAULT_NODE_ICON = os.path.join(ICON_PATH, "nodeIcon.png")
+
+DEFAULT_GROUP_ICON = os.path.join(ICON_PATH, "groupIcon.png")

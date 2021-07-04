@@ -24,7 +24,8 @@ class Connection(object):
     def __repr__(self):
         """Presentation of this class"""
         return f'Connection({self._source_node.name}.{self._source_plug.name}'\
-               f',{self.destination_node.name}.{self._destination_plug.name})'
+               f',{self.destination_node.name}.{self._destination_plug.name})'\
+               f' at {hex(id(self))}'
 
     def __str__(self):
         """String representation of this class."""

@@ -33,7 +33,7 @@ def get_node_logger(module=__file__, debug_level=logging.DEBUG):
 
     logger_name = os.path.split(module)[-1].split(".")[0]
     formatter = logging.Formatter(
-        fmt='%(levelname)s\t%(asctime)s-%(name)s-\t%(message)s',
+        fmt='%(levelname)s\t%(asctime)s-%(name)s-%(funcName)s-\t%(message)s',
         datefmt='%d-%b-%y-%H:%M:%S'
     )
 

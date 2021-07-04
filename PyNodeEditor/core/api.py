@@ -7,6 +7,8 @@ import utils
 from nodeLogger import get_node_logger
 from connectionCore import Connection
 from nodeCore import Node
+from groupCore import Group
+from exceptions import NodeRegistrationError
 
 logger = get_node_logger(__file__)
 
@@ -54,12 +56,14 @@ def get_engine_plug_types():
     return get_object_types_from_engine(object_type="plugs")
 
 
-def create_node(name: str, node_type: str):
+def create_node(name: str, node_type: str, note=None, annotation=None):
     """
     This function creates the node with given name and type.
     Args:
         name (str): Name of the node to create.
         node_type (str): type of node to create.
+        note (str): Note to give for node.
+        annotation (str): Annotation for node.
 
     Returns:
         Node: Returns the Node object.
@@ -70,12 +74,9 @@ def create_node(name: str, node_type: str):
 
     engine_node_types = get_engine_node_types()
     if node_type not in engine_node_types:
-        logger.error(
+        raise NodeRegistrationError(
             f'Failed to create node, node-type "{node_type}" '
             f'is not registered with the engine.'
-        )
-        raise TypeError(
-            f'Node-type "{node_type}" is not registered with the engine.'
         )
 
     logger.info(f'Creating "{node_type}" node with name "{name}"')
@@ -91,13 +92,37 @@ def create_node(name: str, node_type: str):
                         module = importlib.util.module_from_spec(module_source)
                         module_source.loader.exec_module(module)
                         object_ = module.main()
-                        return object_(name=name)
+                        return object_(
+                            name=name, note=note, annotation=annotation
+                        )
                     except Exception as err:
                         logger.error(
                             f'Failed to create Node {name} with error : {err}'
                         )
                         logger.error(traceback.format_exc())
                         return
+
+
+def create_group(name: str, nodes: list, note=None, annotation=None):
+    """
+    This function create group of given nodes.
+    Args:
+        name (str): Name for the group to create.
+        nodes (list): List containing Node object.
+        note (str): Note to give for group.
+        annotation (str): Annotation for group.
+
+    Returns:
+        Group: Returns created group object.
+    """
+    group = Group(name=name, nodes=nodes, note=note, annotation=annotation)
+
+    # creating input nodes for the group.
+    for node in nodes:
+        input_plugs = node.input_plugs
+        for plug in input_plugs:
+            plug_name = plug.name
+    return group
 
 
 def get_all_nodes_from_network():

@@ -23,3 +23,31 @@ class PlugRegistrationError(Exception):
     def __init__(self, message=None):
         super().__init__()
         logger.error(message)
+
+
+class GroupRegistrationError(Exception):
+    """Gets raised when group is failed to register"""
+    def __init__(self, message=None):
+        super().__init__()
+        logger.error(message)
+
+
+class ComputeError(Exception):
+    """Get raised when node fails to compute"""
+    def __init__(self, message=None):
+        super().__init__()
+        logger.error(message)
+
+
+class NetworkOpenError(Exception):
+    """Get raised when engine fails to load / open network from file."""
+    def __init__(self, message=None):
+        super().__init__()
+        logger.error(message)
+
+
+class MissingPlugError(Exception):
+    """Get raised when failed to found the plug."""
+    def __init__(self, message=None):
+        super().__init__()
+        logger.error(message)

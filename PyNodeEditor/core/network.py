@@ -20,7 +20,7 @@ class Network(object):
 
     def __repr__(self):
         """Representing this class"""
-        return f'Network()'
+        return f'Network() at {hex(id(self))}'
 
     def __str__(self):
         """Representing this class in string format"""
