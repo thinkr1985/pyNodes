@@ -2,7 +2,6 @@
 
 from nodeLogger import get_node_logger
 from plugCore import OutputPlug
-from connectionCore import Connection
 from registry import CheckDuplicateRegistryName, RegisterTime
 from exceptions import ComputeError, MissingPlugError
 from constants import DEFAULT_NODE_ICON
@@ -449,6 +448,8 @@ class Node(object):
         except Exception as err:
             ComputeError(f'Failed to compute node "{self.name}": {err}')
             self._is_dirty = True
+            if self._group:
+                self._group.is_dirty = True
 
     def evaluate_children(self):
         """

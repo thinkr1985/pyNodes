@@ -169,6 +169,8 @@ class Group(object):
         if isinstance(value, bool):
             self._cached = value
             logger.info(f'Cache state set for group "{self._name}" to {value}')
+            for node in self._nodes:
+                node.cached = value
 
     @property
     def is_dirty(self):
