@@ -236,7 +236,10 @@ class RegisterGroup(object):
                 f'as group with same name already exists!'
             )
 
-        node = self._group_class(**kwargs)
-        logger.debug(f'Registering group "{node.name}" to Network "{name}"')
-        constants.NETWORK.add_node(node)
-        return node
+        group = self._group_class(**kwargs)
+        logger.debug(f'Registering group "{group.name}" to Network "{name}"')
+        constants.NETWORK.add_node(group)
+        for node in nodes:
+            node.group = group
+
+        return group

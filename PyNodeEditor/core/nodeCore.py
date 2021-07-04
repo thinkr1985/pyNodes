@@ -2,6 +2,7 @@
 
 from nodeLogger import get_node_logger
 from plugCore import OutputPlug
+from connectionCore import Connection
 from registry import CheckDuplicateRegistryName, RegisterTime
 from exceptions import ComputeError, MissingPlugError
 from constants import DEFAULT_NODE_ICON
@@ -27,6 +28,7 @@ class Node(object):
         self._cached = False
         self._is_dirty = False
         self._node_type = 'node'
+        self._group = None
 
         self.setup_plugs()
 
@@ -53,6 +55,7 @@ class Node(object):
         yield 'cached', self._cached
         yield 'isDirty', self._is_dirty
         yield 'isAnimated', self.is_animated
+        yield 'group', self._group
 
     def __getattr__(self, plug_name: str):
         """
@@ -89,6 +92,7 @@ class Node(object):
             'cached': self._cached,
             'isDirty': self._is_dirty,
             'isAnimated': self.is_animated,
+            'group': self._group
         }
 
     def as_dict(self):
@@ -129,37 +133,6 @@ class Node(object):
         """
         logger.debug(f'Renaming node "{self._name}" to "{name.strip()}"')
         self._name = str(name).strip()
-
-    def parents(self):
-        """
-        Gets the parent nodes.
-        Returns:
-            list: Returns list containing parent nodes.
-        """
-        logger.debug(f'Getting all the parents of the node "{self._name}"')
-        parents = []
-        for plug in self._input_plugs:
-            if plug.connection:
-                if plug.connection.source_node not in parents:
-                    parents.append(plug.connection.source_node)
-        return parents
-
-    def children(self):
-        """
-        gets all children of the nodes.
-        Returns:
-            list: Returns list containing child nodes.
-        """
-        logger.debug(f'Getting all the children nodes of node "{self._name}"')
-        children = []
-        if self._output_plug.connections:
-            for con in self._output_plug.connections:
-                dest_node = con.destination_node
-                if dest_node not in children:
-                    children.append(dest_node)
-        else:
-            logger.debug(f'No children found in the node"{self._name}"')
-        return children
 
     @property
     def input_plugs(self):
@@ -311,6 +284,83 @@ class Node(object):
         for plug in self._input_plugs:
             if plug.is_animated:
                 return True
+
+    @property
+    def group(self):
+        """
+        This property gets the group object of this node.
+        Returns:
+            Group: Returns group object.
+        """
+        return self._group
+
+    @group.setter
+    def group(self, group_object):
+        """
+        This method sets the group of the node.
+        Args:
+            group_object (Group): group object.
+
+        Returns:
+            None: Returns None.
+        """
+        self._group = group_object
+
+    def get_input_connections(self):
+        """
+        This method gives all the input connections of the node.
+        Returns:
+            list: Returns list containing input connection objects.
+        """
+        logger.debug(f'Getting input connections of the node "{self._name}"')
+        connections = list()
+        for plug in self._input_plugs:
+            if plug.connection:
+                connections.append(plug.connection)
+        return connections
+
+    def get_output_connections(self):
+        """
+        This method gives all the output connections of the node.
+        Returns:
+            list: Returns list containing output connection objects.
+        """
+        logger.debug(f'Getting output connections of the node "{self._name}"')
+        connections = list()
+        if self._output_plug.connections:
+            connections.extend(self._output_plug.connections)
+        return connections
+
+    def parents(self):
+        """
+        Gets the parent nodes.
+        Returns:
+            list: Returns list containing parent nodes.
+        """
+        logger.debug(f'Getting all the parents of the node "{self._name}"')
+        parents = list()
+        for plug in self._input_plugs:
+            if plug.connection:
+                if plug.connection.source_node not in parents:
+                    parents.append(plug.connection.source_node)
+        return parents
+
+    def children(self):
+        """
+        gets all children of the nodes.
+        Returns:
+            list: Returns list containing child nodes.
+        """
+        logger.debug(f'Getting all the children nodes of node "{self._name}"')
+        children = list()
+        if self._output_plug.connections:
+            for con in self._output_plug.connections:
+                dest_node = con.destination_node
+                if dest_node not in children:
+                    children.append(dest_node)
+        else:
+            logger.debug(f'No children found in the node"{self._name}"')
+        return children
 
     def get_child(self, child_node_name):
         """

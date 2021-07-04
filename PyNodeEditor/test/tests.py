@@ -106,6 +106,19 @@ class TestNodes(unittest.TestCase):
         self.assertEqual(2, another_node.Number2.value)
         self.assertEqual(45, another_node.output)
 
+    def test_group_node(self):
+        add_node = api.create_node(
+            name="MyTestNode2", node_type="subtraction"
+        )
+        another_node = api.create_node(
+            name="MyExtraNode2", node_type="subtraction"
+        )
+        add_node.Number1.value = 5
+        add_node.Number2.value = 7
+        group = api.create_group(name="MyTestGroup",
+                                 nodes=[add_node, another_node]
+                                 )
+
 
 if __name__ == "__main__":
     unittest.main()

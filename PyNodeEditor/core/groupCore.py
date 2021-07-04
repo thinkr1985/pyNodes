@@ -1,6 +1,6 @@
 """Creating Group class"""
 from nodeLogger import get_node_logger
-from registry import CheckDuplicateRegistryName, RegisterGroup, RegisterTime
+from registry import CheckDuplicateRegistryName, RegisterGroup
 from exceptions import MissingPlugError
 from constants import DEFAULT_GROUP_ICON
 
@@ -21,11 +21,11 @@ class Group(object):
         self._node_type = 'group'
         self._annotation = kwargs.get("annotation") or str()
         self._note = kwargs.get("note") or str()
-        self._input_plugs = list()
-        self._output_plugs = list()
         self._cached = False
         self._is_dirty = False
         self._icon = kwargs.get("icon") or DEFAULT_GROUP_ICON
+        for node in self._nodes:
+            node.group = self
 
     def __repr__(self):
         """Representing this class"""
@@ -41,33 +41,27 @@ class Group(object):
         yield 'nodes', [node.as_dict() for node in self._nodes]
         yield 'note', self._note
         yield 'annotation', self._annotation
-        yield 'inputPlugs', self._input_plugs
-        yield 'outputPlugs', self._output_plugs
         yield 'icon', self._icon
         yield 'isDirty', self._is_dirty
         yield 'cached', self._cached
 
-    def __getattr__(self, plug_name: str):
+    def __getattr__(self, node_name: str):
         """
         setting getattr method to get input plugs
         Args:
-            plug_name (str): Name of the plug.
+            node_name (str): Name of the node.
 
         Returns:
             InputPlug: Returns the Input Plug object.
         """
         found = False
-        for item in self._input_plugs:
-            if item.name == plug_name:
-                return item
-
-        for item in self._output_plugs:
-            if item.name == plug_name:
+        for item in self.nodes:
+            if item.name == node_name:
                 return item
 
         if not found:
             raise MissingPlugError(
-                f'Plug not exists with name "{plug_name}" '
+                f'Plug not exists with name "{node_name}" '
                 f'in the node "{self._name}"'
             )
 
@@ -92,14 +86,6 @@ class Group(object):
         """
         logger.debug(f'Renaming group "{self._name}" to "{name.strip()}"')
         self._name = str(name).strip()
-
-    @property
-    def input_plugs(self):
-        return self._input_plugs
-
-    @property
-    def output_plugs(self):
-        return self._output_plugs
 
     @property
     def note(self):
@@ -217,8 +203,6 @@ class Group(object):
             'nodes': [node.as_dict() for node in self._nodes],
             'note': self._note,
             'annotation': self._annotation,
-            'inputPlugs': self._input_plugs,
-            'outputPlugs': self._output_plugs,
             'icon': self._icon,
             'isDirty': self._is_dirty,
             'cached': self._cached
@@ -254,31 +238,3 @@ class Group(object):
         """
         return self._dict()
 
-    def compute(self):
-        """
-        This method computes the result of all inputs.
-        Returns:
-
-        """
-        pass
-
-    @RegisterTime
-    def evaluate(self):
-        """
-        This method calls compute method to evaluate the node.
-        Returns:
-            Returns the result of computation.
-        """
-        logger.debug(f'Evaluating Node "{self.name}" in state:{self._cached}')
-
-        pass
-
-    def evaluate_children(self):
-        """
-        This method evaluates all its children
-        Returns:
-            None: Returns None.
-        """
-        logger.debug(f'Trigger Evaluation of children of node "{self._name}"')
-        for child in self.nodes:
-            child.evaluate()

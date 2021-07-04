@@ -116,12 +116,6 @@ def create_group(name: str, nodes: list, note=None, annotation=None):
         Group: Returns created group object.
     """
     group = Group(name=name, nodes=nodes, note=note, annotation=annotation)
-
-    # creating input nodes for the group.
-    for node in nodes:
-        input_plugs = node.input_plugs
-        for plug in input_plugs:
-            plug_name = plug.name
     return group
 
 
@@ -132,6 +126,19 @@ def get_all_nodes_from_network():
         dict: Returns dict containing node data.
     """
     return constants.NETWORK.nodes
+
+
+def get_start_nodes_from_selection(nodes: list):
+    start_nodes = []
+    node_names = [x.name for x in nodes]
+    for node in nodes:
+        parents = node.parents()
+        if not parents:
+            start_nodes.append(node)
+            continue
+        if len(parents) == 1:
+            if parents[0].name in node_names:
+                continue
 
 
 def connect_nodes(source_plug, destination_plug):
